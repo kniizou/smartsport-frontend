@@ -1,15 +1,18 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, X, LogIn, User } from "lucide-react";
+import { Search, Menu, X, LogIn, User, Gamepad, Trophy } from "lucide-react";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+  
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border/50 backdrop-blur-xl bg-background/80">
@@ -26,17 +29,37 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
-            <Link to="/" className="px-3 py-2 rounded-lg text-foreground/80 hover:text-accent hover:bg-accent/5 transition-colors">
+            <Link 
+              to="/" 
+              className={`px-3 py-2 rounded-lg ${isActive('/') 
+                ? 'text-accent bg-accent/10' 
+                : 'text-foreground/80 hover:text-accent hover:bg-accent/5'} transition-colors`}
+            >
               Accueil
             </Link>
-            <Link to="/tournaments" className="px-3 py-2 rounded-lg text-foreground/80 hover:text-accent hover:bg-accent/5 transition-colors">
+            <Link 
+              to="/tournaments" 
+              className={`px-3 py-2 rounded-lg ${isActive('/tournaments') 
+                ? 'text-accent bg-accent/10' 
+                : 'text-foreground/80 hover:text-accent hover:bg-accent/5'} transition-colors`}
+            >
               Tournois
             </Link>
-            <Link to="/games" className="px-3 py-2 rounded-lg text-foreground/80 hover:text-accent hover:bg-accent/5 transition-colors">
-              Jeux
+            <Link 
+              to="/games" 
+              className={`px-3 py-2 rounded-lg ${isActive('/games') 
+                ? 'text-accent bg-accent/10' 
+                : 'text-foreground/80 hover:text-accent hover:bg-accent/5'} transition-colors flex items-center`}
+            >
+              <Gamepad className="mr-1 h-4 w-4" /> Jeux
             </Link>
-            <Link to="/ranking" className="px-3 py-2 rounded-lg text-foreground/80 hover:text-accent hover:bg-accent/5 transition-colors">
-              Classement
+            <Link 
+              to="/ranking" 
+              className={`px-3 py-2 rounded-lg ${isActive('/ranking') 
+                ? 'text-accent bg-accent/10' 
+                : 'text-foreground/80 hover:text-accent hover:bg-accent/5'} transition-colors flex items-center`}
+            >
+              <Trophy className="mr-1 h-4 w-4" /> Classement
             </Link>
           </div>
         </div>
@@ -50,12 +73,16 @@ const Navbar = () => {
               className="w-48 pl-10 pr-4 py-2 bg-secondary/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent text-sm"
             />
           </div>
-          <Button variant="outline" className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent">
-            <LogIn className="mr-2 h-4 w-4" /> Se connecter
-          </Button>
-          <Button className="esports-gradient shadow-lg shadow-esports-purple/20">
-            <User className="mr-2 h-4 w-4" /> S'inscrire
-          </Button>
+          <Link to="/login">
+            <Button variant="outline" className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent">
+              <LogIn className="mr-2 h-4 w-4" /> Se connecter
+            </Button>
+          </Link>
+          <Link to="/register">
+            <Button className="esports-gradient shadow-lg shadow-esports-purple/20">
+              <User className="mr-2 h-4 w-4" /> S'inscrire
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile Navigation Toggle */}
@@ -75,39 +102,43 @@ const Navbar = () => {
           <div className="container mx-auto px-6 py-6 flex flex-col space-y-5">
             <Link
               to="/"
-              className="px-4 py-2.5 rounded-lg hover:bg-secondary/50 transition-colors flex items-center"
+              className={`px-4 py-2.5 rounded-lg ${isActive('/') ? 'bg-accent/10 text-accent' : 'hover:bg-secondary/50'} transition-colors flex items-center`}
               onClick={toggleMenu}
             >
               Accueil
             </Link>
             <Link
               to="/tournaments"
-              className="px-4 py-2.5 rounded-lg hover:bg-secondary/50 transition-colors flex items-center"
+              className={`px-4 py-2.5 rounded-lg ${isActive('/tournaments') ? 'bg-accent/10 text-accent' : 'hover:bg-secondary/50'} transition-colors flex items-center`}
               onClick={toggleMenu}
             >
               Tournois
             </Link>
             <Link
               to="/games"
-              className="px-4 py-2.5 rounded-lg hover:bg-secondary/50 transition-colors flex items-center"
+              className={`px-4 py-2.5 rounded-lg ${isActive('/games') ? 'bg-accent/10 text-accent' : 'hover:bg-secondary/50'} transition-colors flex items-center`}
               onClick={toggleMenu}
             >
-              Jeux
+              <Gamepad className="mr-2 h-4 w-4" /> Jeux
             </Link>
             <Link
               to="/ranking"
-              className="px-4 py-2.5 rounded-lg hover:bg-secondary/50 transition-colors flex items-center"
+              className={`px-4 py-2.5 rounded-lg ${isActive('/ranking') ? 'bg-accent/10 text-accent' : 'hover:bg-secondary/50'} transition-colors flex items-center`}
               onClick={toggleMenu}
             >
-              Classement
+              <Trophy className="mr-2 h-4 w-4" /> Classement
             </Link>
             <div className="flex flex-col space-y-3 pt-3 border-t border-border">
-              <Button variant="outline" className="justify-start border-accent text-accent hover:bg-accent/10">
-                <LogIn className="mr-2 h-4 w-4" /> Se connecter
-              </Button>
-              <Button className="justify-start esports-gradient">
-                <User className="mr-2 h-4 w-4" /> S'inscrire
-              </Button>
+              <Link to="/login" onClick={toggleMenu}>
+                <Button variant="outline" className="justify-start border-accent text-accent hover:bg-accent/10 w-full">
+                  <LogIn className="mr-2 h-4 w-4" /> Se connecter
+                </Button>
+              </Link>
+              <Link to="/register" onClick={toggleMenu}>
+                <Button className="justify-start esports-gradient w-full">
+                  <User className="mr-2 h-4 w-4" /> S'inscrire
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
