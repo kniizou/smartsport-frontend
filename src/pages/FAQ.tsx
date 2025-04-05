@@ -1,10 +1,14 @@
-
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import { useState, useMemo } from "react";
 
 const FAQ = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  
   const faqItems = [
     {
       question: "Comment s'inscrire à un tournoi ?",
@@ -36,6 +40,18 @@ const FAQ = () => {
     }
   ];
 
+  // Filtrer les FAQ en fonction de la recherche
+  const filteredFAQs = useMemo(() => {
+    if (!searchQuery.trim()) return faqItems;
+    
+    const normalizedQuery = searchQuery.toLowerCase().trim();
+    return faqItems.filter(
+      item => 
+        item.question.toLowerCase().includes(normalizedQuery) || 
+        item.answer.toLowerCase().includes(normalizedQuery)
+    );
+  }, [searchQuery, faqItems]);
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
@@ -49,20 +65,40 @@ const FAQ = () => {
             </p>
           </div>
 
+          <div className="relative mb-6">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+              <Search className="h-5 w-5" />
+            </div>
+            <Input
+              type="text"
+              placeholder="Rechercher dans la FAQ..."
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
           <Card className="border border-border/50 bg-card/50 backdrop-blur-md shadow-xl">
             <CardContent className="p-6">
-              <Accordion type="single" collapsible className="space-y-2">
-                {faqItems.map((item, index) => (
-                  <AccordionItem key={index} value={`item-${index}`} className="border border-border/50 rounded-lg px-5">
-                    <AccordionTrigger className="text-lg font-medium py-4 hover:text-accent transition-colors">
-                      {item.question}
-                    </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground pb-4 pt-1">
-                      {item.answer}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
+              {filteredFAQs.length > 0 ? (
+                <Accordion type="single" collapsible className="space-y-2">
+                  {filteredFAQs.map((item, index) => (
+                    <AccordionItem key={index} value={`item-${index}`} className="border border-border/50 rounded-lg px-5">
+                      <AccordionTrigger className="text-lg font-medium py-4 hover:text-accent transition-colors">
+                        {item.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground pb-4 pt-1">
+                        {item.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              ) : (
+                <div className="text-center py-10">
+                  <p className="text-muted-foreground">Aucune réponse trouvée pour votre recherche.</p>
+                  <p className="mt-2">Essayez d'autres termes ou <a href="/contact" className="text-accent hover:underline">contactez-nous</a> directement.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
           
