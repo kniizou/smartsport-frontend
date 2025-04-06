@@ -11,7 +11,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useToast } from "@/components/ui/use-toast";
 
-// Mock data pour un tournoi spécifique
+// Modifié pour éviter la duplication de la propriété 'teams'
 const tournamentData = {
   id: 1,
   title: "Valorant Champions Tour",
@@ -20,7 +20,7 @@ const tournamentData = {
   startDate: "2024-04-15",
   endDate: "2024-04-20",
   location: "En ligne / Finale à Paris",
-  teams: 16,
+  teamsCount: 16,
   registeredTeams: 16,
   prize: "10,000€",
   format: "Double élimination",
@@ -294,7 +294,7 @@ const TournamentDetail = () => {
                       <div>
                         <p className="font-medium">Équipes</p>
                         <p className="text-sm text-muted-foreground">
-                          {tournament.registeredTeams}/{tournament.teams} équipes inscrites
+                          {tournament.registeredTeams}/{tournament.teamsCount} équipes inscrites
                         </p>
                       </div>
                     </div>
