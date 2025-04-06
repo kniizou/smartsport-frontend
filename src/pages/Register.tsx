@@ -3,21 +3,61 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { User, Lock, Mail, Eye, EyeOff, UserPlus, Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Register = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Register with:", { username, email, password, confirmPassword });
-    // Logique d'inscription ici
+    
+    if (password !== confirmPassword) {
+      toast.error("Les mots de passe ne correspondent pas");
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      
+      // Inscription avec Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username,
+          },
+        }
+      });
+
+      if (error) {
+        console.error("Erreur d'inscription:", error);
+        if (error.message.includes("duplicate")) {
+          toast.error("Un utilisateur avec cet email existe déjà");
+        } else {
+          toast.error("Erreur lors de l'inscription: " + error.message);
+        }
+        return;
+      }
+      
+      toast.success("Inscription réussie! Vous pouvez maintenant vous connecter.");
+      navigate("/login");
+    } catch (error) {
+      console.error("Erreur:", error);
+      toast.error("Une erreur inattendue s'est produite");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Conditions de sécurité du mot de passe
@@ -173,10 +213,22 @@ const Register = () => {
               <Button 
                 type="submit" 
                 className="w-full esports-gradient h-12 font-medium shadow-[0_0_15px_rgba(139,92,246,0.5)]"
-                disabled={!hasMinLength || !hasUppercase || !hasLowercase || !hasNumber || !passwordsMatch}
+                disabled={!hasMinLength || !hasUppercase || !hasLowercase || !hasNumber || !passwordsMatch || isLoading}
               >
-                <UserPlus className="mr-2 h-4 w-4" />
-                S'inscrire
+                {isLoading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Inscription...
+                  </span>
+                ) : (
+                  <>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    S'inscrire
+                  </>
+                )}
               </Button>
             </form>
 

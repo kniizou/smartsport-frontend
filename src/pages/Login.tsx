@@ -3,18 +3,48 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Link } from "react-router-dom";
-import { LogIn, User, Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { LogIn, Mail, Eye, EyeOff, Lock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login with:", { email, password });
-    // Logique d'authentification ici
+    
+    try {
+      setIsLoading(true);
+      
+      // Connexion avec Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error("Erreur de connexion:", error);
+        if (error.message.includes("Invalid login")) {
+          toast.error("Email ou mot de passe incorrect");
+        } else {
+          toast.error("Erreur lors de la connexion: " + error.message);
+        }
+        return;
+      }
+      
+      toast.success("Connexion réussie!");
+      navigate("/"); // Redirection vers la page d'accueil
+    } catch (error) {
+      console.error("Erreur:", error);
+      toast.error("Une erreur inattendue s'est produite");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -96,9 +126,25 @@ const Login = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full esports-gradient h-12 font-medium shadow-[0_0_15px_rgba(139,92,246,0.5)]">
-                <LogIn className="mr-2 h-4 w-4" />
-                Se connecter
+              <Button 
+                type="submit" 
+                className="w-full esports-gradient h-12 font-medium shadow-[0_0_15px_rgba(139,92,246,0.5)]"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Connexion...
+                  </span>
+                ) : (
+                  <>
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Se connecter
+                  </>
+                )}
               </Button>
             </form>
 
