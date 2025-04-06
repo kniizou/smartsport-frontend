@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Tournaments from "./pages/Tournaments";
+import TournamentDetail from "./pages/TournamentDetail";
 import Games from "./pages/Games";
 import Ranking from "./pages/Ranking";
 import Login from "./pages/Login";
@@ -29,6 +30,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/tournaments" element={<Tournaments />} />
+          <Route path="/tournament/:id" element={<TournamentDetail />} />
           <Route path="/games" element={<Games />} />
           <Route path="/ranking" element={<Ranking />} />
           <Route path="/login" element={<Login />} />
