@@ -9,16 +9,208 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      matches: {
+        Row: {
+          created_at: string | null
+          end_time: string | null
+          id: string
+          player1_id: string | null
+          player2_id: string | null
+          round: number
+          score_player1: number | null
+          score_player2: number | null
+          start_time: string | null
+          status: string
+          tournament_id: string
+          updated_at: string | null
+          winner_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          player1_id?: string | null
+          player2_id?: string | null
+          round: number
+          score_player1?: number | null
+          score_player2?: number | null
+          start_time?: string | null
+          status?: string
+          tournament_id: string
+          updated_at?: string | null
+          winner_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          player1_id?: string | null
+          player2_id?: string | null
+          round?: number
+          score_player1?: number | null
+          score_player2?: number | null
+          start_time?: string | null
+          status?: string
+          tournament_id?: string
+          updated_at?: string | null
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          id: string
+          updated_at?: string | null
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
+      tournament_participants: {
+        Row: {
+          id: string
+          registration_date: string | null
+          status: string
+          tournament_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          registration_date?: string | null
+          status?: string
+          tournament_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          registration_date?: string | null
+          status?: string
+          tournament_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_participants_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournaments: {
+        Row: {
+          cover_image: string | null
+          created_at: string | null
+          creator_id: string | null
+          description: string | null
+          end_date: string | null
+          game: string
+          id: string
+          max_participants: number
+          prize: string | null
+          rules: string | null
+          start_date: string
+          status: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          cover_image?: string | null
+          created_at?: string | null
+          creator_id?: string | null
+          description?: string | null
+          end_date?: string | null
+          game: string
+          id?: string
+          max_participants?: number
+          prize?: string | null
+          rules?: string | null
+          start_date: string
+          status?: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          cover_image?: string | null
+          created_at?: string | null
+          creator_id?: string | null
+          description?: string | null
+          end_date?: string | null
+          game?: string
+          id?: string
+          max_participants?: number
+          prize?: string | null
+          rules?: string | null
+          start_date?: string
+          status?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +325,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

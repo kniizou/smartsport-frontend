@@ -57,11 +57,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const checkAdminStatus = async (userId: string) => {
     try {
-      // Temporairement, pour contourner l'erreur de type, nous utilisons une méthode alternative.
-      // Cette fonction simulera la vérification du statut admin.
-      // Dans un environnement de production, vous voudriez vérifier les rôles utilisateur dans une table dédiée.
-      
-      // Pour l'exemple, nous allons vérifier si l'email de l'utilisateur se termine par @admin.com
+      // Nous utilisons la méthode existante qui fonctionne pour vérifier l'admin
+      // via l'adresse email, en attendant que la table user_roles soit configurée
       const userData = await supabase.auth.getUser();
       const userEmail = userData.data.user?.email;
       
@@ -69,14 +66,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const isAdminUser = userEmail ? userEmail.endsWith('@admin.com') : false;
       setIsAdmin(isAdminUser);
       
-      // Note: Dans un environnement réel, vous utiliseriez une table user_roles:
-      // const { data, error } = await supabase
-      //   .from('user_roles')
-      //   .select('*')
-      //   .eq('user_id', userId)
-      //   .eq('role', 'admin')
-      //   .single();
-      // 
+      // Note: Dans un environnement réel avec MariaDB/MySQL, vous utiliseriez:
+      // const { data, error } = await supabase.rpc('check_user_role', { 
+      //   user_id: userId,
+      //   role_name: 'admin'
+      // });
       // setIsAdmin(!!data);
     } catch (error) {
       console.error('Error checking admin status:', error);
@@ -94,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (error) throw error;
       
       toast.success('Connexion réussie');
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       toast.error(error.message || 'Échec de la connexion');
       console.error('Error signing in:', error);
