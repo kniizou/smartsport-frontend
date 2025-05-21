@@ -11,6 +11,7 @@ type AuthContextType = {
   isAdmin: boolean;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, username: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -57,24 +58,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const checkAdminStatus = async (userId: string) => {
     try {
-      // Nous utilisons la méthode existante qui fonctionne pour vérifier l'admin
-      // via l'adresse email, en attendant que la table user_roles soit configurée
-      const userData = await supabase.auth.getUser();
-      const userEmail = userData.data.user?.email;
+      // Vérifier si l'utilisateur a un rôle admin dans la base de données
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .single();
       
-      // Simulation: Tout utilisateur avec un email se terminant par @admin.com est considéré comme un admin
-      const isAdminUser = userEmail ? userEmail.endsWith('@admin.com') : false;
-      setIsAdmin(isAdminUser);
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking admin status:', error);
+      }
       
-      // Note: Dans un environnement réel avec MariaDB/MySQL, vous utiliseriez:
-      // const { data, error } = await supabase.rpc('check_user_role', { 
-      //   user_id: userId,
-      //   role_name: 'admin'
-      // });
-      // setIsAdmin(!!data);
+      setIsAdmin(!!data);
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);
+    }
+  };
+
+  const signUp = async (email: string, password: string, username: string) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username,
+          },
+        }
+      });
+
+      if (error) throw error;
+      
+      toast.success('Inscription réussie! Vous pouvez maintenant vous connecter.');
+      navigate('/login');
+    } catch (error: any) {
+      toast.error(error.message || 'Échec de l\'inscription');
+      console.error('Error signing up:', error);
     }
   };
 
@@ -113,6 +134,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isAdmin,
       isLoading,
       signIn,
+      signUp,
       signOut
     }}>
       {children}

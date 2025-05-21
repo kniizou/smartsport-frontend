@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,9 +6,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { User, Lock, Mail, Eye, EyeOff, UserPlus, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Register = () => {
   const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [username, setUsername] = useState("");
@@ -29,29 +30,9 @@ const Register = () => {
     try {
       setIsLoading(true);
       
-      // Inscription avec Supabase
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username,
-          },
-        }
-      });
-
-      if (error) {
-        console.error("Erreur d'inscription:", error);
-        if (error.message.includes("duplicate")) {
-          toast.error("Un utilisateur avec cet email existe déjà");
-        } else {
-          toast.error("Erreur lors de l'inscription: " + error.message);
-        }
-        return;
-      }
+      // Inscription avec Supabase via notre contexte d'authentification
+      await signUp(email, password, username);
       
-      toast.success("Inscription réussie! Vous pouvez maintenant vous connecter.");
-      navigate("/login");
     } catch (error) {
       console.error("Erreur:", error);
       toast.error("Une erreur inattendue s'est produite");
