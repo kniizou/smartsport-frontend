@@ -3,16 +3,37 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Search, Menu, X, LogIn, User, Gamepad, Trophy } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
   
   const isActive = (path: string) => location.pathname === path;
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
+  // Obtenir les initiales du nom d'utilisateur pour l'avatar
+  const getUserInitials = () => {
+    if (!user) return "U";
+    const email = user.email || "";
+    return email.charAt(0).toUpperCase();
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border/50 backdrop-blur-xl bg-background/80">
@@ -73,16 +94,52 @@ const Navbar = () => {
               className="w-48 pl-10 pr-4 py-2 bg-secondary/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent text-sm"
             />
           </div>
-          <Link to="/login">
-            <Button variant="outline" className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent">
-              <LogIn className="mr-2 h-4 w-4" /> Se connecter
-            </Button>
-          </Link>
-          <Link to="/register">
-            <Button className="esports-gradient shadow-lg shadow-esports-purple/20">
-              <User className="mr-2 h-4 w-4" /> S'inscrire
-            </Button>
-          </Link>
+          
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={user.user_metadata?.avatar_url} alt="Photo de profil" />
+                    <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end">
+                <div className="px-2 py-1.5">
+                  <p className="text-sm font-medium">{user.email}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {user.user_metadata?.username || "Utilisateur"}
+                  </p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/dashboard" className="cursor-pointer flex w-full">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profil</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  <span>Se déconnecter</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="outline" className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent">
+                  <LogIn className="mr-2 h-4 w-4" /> Se connecter
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button className="esports-gradient shadow-lg shadow-esports-purple/20">
+                  <User className="mr-2 h-4 w-4" /> S'inscrire
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Navigation Toggle */}
@@ -129,16 +186,34 @@ const Navbar = () => {
               <Trophy className="mr-2 h-4 w-4" /> Classement
             </Link>
             <div className="flex flex-col space-y-3 pt-3 border-t border-border">
-              <Link to="/login" onClick={toggleMenu}>
-                <Button variant="outline" className="justify-start border-accent text-accent hover:bg-accent/10 w-full">
-                  <LogIn className="mr-2 h-4 w-4" /> Se connecter
-                </Button>
-              </Link>
-              <Link to="/register" onClick={toggleMenu}>
-                <Button className="justify-start esports-gradient w-full">
-                  <User className="mr-2 h-4 w-4" /> S'inscrire
-                </Button>
-              </Link>
+              {user ? (
+                <>
+                  <Link to="/dashboard" onClick={toggleMenu}>
+                    <Button variant="outline" className="justify-start border-accent text-accent hover:bg-accent/10 w-full">
+                      <User className="mr-2 h-4 w-4" /> Profil
+                    </Button>
+                  </Link>
+                  <Button 
+                    className="justify-start w-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={handleSignOut}
+                  >
+                    <LogIn className="mr-2 h-4 w-4" /> Se déconnecter
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" onClick={toggleMenu}>
+                    <Button variant="outline" className="justify-start border-accent text-accent hover:bg-accent/10 w-full">
+                      <LogIn className="mr-2 h-4 w-4" /> Se connecter
+                    </Button>
+                  </Link>
+                  <Link to="/register" onClick={toggleMenu}>
+                    <Button className="justify-start esports-gradient w-full">
+                      <User className="mr-2 h-4 w-4" /> S'inscrire
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
